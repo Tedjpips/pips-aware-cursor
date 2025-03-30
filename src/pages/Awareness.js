@@ -17,8 +17,6 @@ import {
   LockOpen as LockOpenIcon,
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
-import { auth, db } from '../config/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -51,15 +49,13 @@ const Awareness = ({ user, darkMode, toggleDarkMode, changeLanguage }) => {
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        setUserData(userDoc.data());
-        setCompletedLessons(userDoc.data().completedLessons || []);
-      }
-    };
-    fetchUserData();
-  }, [user.uid]);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUserData(userData);
+      setCompletedLessons(userData.completedLessons || []);
+    }
+  }, []);
 
   const handleLessonClick = (lesson) => {
     setCurrentLesson(lesson);
@@ -79,11 +75,13 @@ const Awareness = ({ user, darkMode, toggleDarkMode, changeLanguage }) => {
     const totalLessons = Object.values(lessons).flat().length;
     const progress = (updatedLessons.length / totalLessons) * 100;
 
-    // Update user progress in Firebase
-    await updateDoc(doc(db, 'users', user.uid), {
+    // Update user data in localStorage
+    const updatedUserData = {
+      ...userData,
       completedLessons: updatedLessons,
       progress: Math.min(progress, 100)
-    });
+    };
+    localStorage.setItem('user', JSON.stringify(updatedUserData));
 
     setCurrentLesson(null);
   };

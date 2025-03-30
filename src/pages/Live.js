@@ -15,8 +15,6 @@ import {
   LiveTv as LiveIcon,
   Notifications as NotificationsIcon
 } from '@mui/icons-material';
-import { auth, db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -28,41 +26,35 @@ const Live = ({ user, darkMode, toggleDarkMode, changeLanguage }) => {
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        setUserData(userDoc.data());
-        if (userDoc.data().progress < 100) {
-          navigate('/');
-        }
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUserData(userData);
+      if (userData.progress < 100) {
+        navigate('/');
       }
-    };
-    fetchUserData();
-  }, [user.uid, navigate]);
+    }
+  }, [navigate]);
 
   useEffect(() => {
-    // Fetch upcoming live events
-    const fetchEvents = async () => {
-      // This would be replaced with actual Firebase query
-      const mockEvents = [
-        {
-          id: '1',
-          title: 'Advanced Trading Strategies',
-          date: '2024-03-20T15:00:00Z',
-          duration: 120,
-          description: 'Learn advanced trading strategies from industry experts.'
-        },
-        {
-          id: '2',
-          title: 'Market Analysis Workshop',
-          date: '2024-03-25T14:00:00Z',
-          duration: 90,
-          description: 'Deep dive into current market trends and analysis.'
-        }
-      ];
-      setUpcomingEvents(mockEvents);
-    };
-    fetchEvents();
+    // Mock data for upcoming events
+    const mockEvents = [
+      {
+        id: '1',
+        title: 'Advanced Trading Strategies',
+        date: '2024-03-20T15:00:00Z',
+        duration: 120,
+        description: 'Learn advanced trading strategies from industry experts.'
+      },
+      {
+        id: '2',
+        title: 'Market Analysis Workshop',
+        date: '2024-03-25T14:00:00Z',
+        duration: 90,
+        description: 'Deep dive into current market trends and analysis.'
+      }
+    ];
+    setUpcomingEvents(mockEvents);
   }, []);
 
   const handleNotificationToggle = async (eventId) => {

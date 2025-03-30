@@ -21,8 +21,6 @@ import {
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon
 } from '@mui/icons-material';
-import { auth, db } from '../config/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -43,23 +41,17 @@ const Home = ({ user, darkMode, toggleDarkMode, changeLanguage }) => {
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        setUserData(userDoc.data());
-        setProgress(userDoc.data().progress || 0);
-      }
-    };
-    fetchUserData();
-  }, [user.uid]);
-
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error logging out:', error);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUserData(userData);
+      setProgress(userData.progress || 0);
     }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
   };
 
   const handleNavigation = (path) => {

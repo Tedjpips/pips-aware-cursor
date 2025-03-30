@@ -12,74 +12,26 @@ import {
   MenuItem,
   Paper
 } from '@mui/material';
-import { Google as GoogleIcon } from '@mui/icons-material';
-import { auth, db } from '../config/firebase';
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup,
-  signOut
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
 const SignUp = ({ changeLanguage }) => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
-  const [showUsernameForm, setShowUsernameForm] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const handleGoogleSignIn = async () => {
+  const handleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      // Check if user already exists
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      
-      if (!userDoc.exists()) {
-        setShowUsernameForm(true);
-      } else {
-        navigate('/');
-      }
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  const handleUsernameSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error('No user found');
-      }
-
-      // Check if username is already taken
-      const usernameQuery = await getDoc(doc(db, 'usernames', username));
-      if (usernameQuery.exists()) {
-        setError(t('usernameTaken'));
-        return;
-      }
-
-      // Create user document
-      await setDoc(doc(db, 'users', user.uid), {
+      // Here you would implement your authentication logic
+      // For now, we'll just simulate a successful sign-in
+      localStorage.setItem('user', JSON.stringify({
         username,
-        email: user.email,
-        googleId: user.uid,
+        email: 'user@example.com',
         signUpDate: new Date().toISOString(),
         progress: 0,
-        completedLessons: [],
-        lastLogin: new Date().toISOString()
-      });
-
-      // Create username document
-      await setDoc(doc(db, 'usernames', username), {
-        userId: user.uid
-      });
-
+        completedLessons: []
+      }));
       navigate('/');
     } catch (error) {
       setError(error.message);
@@ -129,34 +81,23 @@ const SignUp = ({ changeLanguage }) => {
               </Select>
             </FormControl>
 
-            {!showUsernameForm ? (
+            <Box component="form" onSubmit={(e) => { e.preventDefault(); handleSignIn(); }} sx={{ width: '100%' }}>
+              <TextField
+                fullWidth
+                label={t('createUsername')}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                sx={{ mb: 2 }}
+              />
               <Button
+                type="submit"
                 variant="contained"
-                startIcon={<GoogleIcon />}
-                onClick={handleGoogleSignIn}
-                sx={{ mt: 2 }}
+                fullWidth
               >
-                {t('signUp')} with Google
+                {t('signUp')}
               </Button>
-            ) : (
-              <Box component="form" onSubmit={handleUsernameSubmit} sx={{ width: '100%' }}>
-                <TextField
-                  fullWidth
-                  label={t('createUsername')}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  sx={{ mb: 2 }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                >
-                  {t('createUsername')}
-                </Button>
-              </Box>
-            )}
+            </Box>
 
             {error && (
               <Typography color="error" sx={{ mt: 2 }}>

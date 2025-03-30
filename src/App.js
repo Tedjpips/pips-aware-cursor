@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useTranslation } from 'react-i18next';
-import { auth } from './config/firebase';
 import './i18n';
 
-// Import pages (we'll create these next)
+// Import pages
 import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Awareness from './pages/Awareness';
@@ -17,13 +16,6 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const { i18n } = useTranslation();
   const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-    });
-    return unsubscribe;
-  }, []);
 
   const theme = createTheme({
     palette: {
